@@ -10,9 +10,11 @@
 //
 //    #define NUM_LEDS 300
 //    CRGBArray<NUM_LEDS> leds;
-//    uint8_t value = 100;
 //    uint8_t gHue = 0;
 
+extern CRGBArray<NUM_LEDS> leds;
+extern uint8_t value;
+extern uint8_t gHue;
 
 
 #include <Arduino.h>

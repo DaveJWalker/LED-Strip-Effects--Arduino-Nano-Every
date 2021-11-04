@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
+extern CRGBArray<NUM_LEDS> leds;
 
 // -._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-
 //

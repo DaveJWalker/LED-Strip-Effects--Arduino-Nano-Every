@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
+extern CRGBArray<NUM_LEDS> leds;
+
 // -._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-
 //
 // Draw Marquee (borrowed from https://github.com/davepl/DavesGarageLEDSeries)
