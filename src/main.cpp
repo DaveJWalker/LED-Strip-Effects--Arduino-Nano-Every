@@ -3,7 +3,7 @@
 #include <ezButton.h>
 
 // Set up debug defines
-#define DEBUG 1
+#define DEBUG 0
 
 // By using #defines, we prevent the serial debug code from getting compiled when
 // not needed, thus saving program space.
