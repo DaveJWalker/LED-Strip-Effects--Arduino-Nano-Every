@@ -3,7 +3,7 @@
 #include <ezButton.h>
 
 // Set up debug defines
-#define DEBUG 0
+#define DEBUG 1
 
 // By using #defines, we prevent the serial debug code from getting compiled when
 // not needed, thus saving program space.
@@ -60,6 +60,8 @@ ezButton button_ptrn_chg(PTRN_CHG_PIN);
 // Include LED patterns
 #include <twinkles.h>
 #include <simple.h>
+#include <marquee.h>
+#include <comet.h>
 
 
 // FramesPerSecond (borrowed from https://github.com/davepl/DavesGarageLEDSeries)
@@ -75,11 +77,7 @@ double FramesPerSecond(double seconds) {
 }
 
 
-
-
-
-
-
+// Initial setup
 void setup() {
   Serial.begin(115200);
 
@@ -100,6 +98,8 @@ void setup() {
   delay(2000);
 }
 
+
+// Main Loop
 void loop() {
 
   // Set the FrameStart time to the end of the last frame.
@@ -190,7 +190,7 @@ void loop() {
 //unsigned long elapsedTime_us  = micros();
 //float         fmillis         = elapsedTime_us/1000.0;
   EVERY_N_SECONDS(5) {
-    debug   ("Elapsed Time (seconds): ");
+    debug   ("Elapsed Time (s): ");
 //  debug   (elapsedTime_ms);
 //  debug   (", ");
     debugln1(fsecondsRunning,3);
