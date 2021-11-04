@@ -35,3 +35,31 @@ void DrawMarquee () {
     }
   }
 }
+
+#include <ledgfx.h>
+
+
+void DrawMarqueeSmooth() {
+  // Only update the frame if more than MIN_FRAME milliseonds has passed
+  EVERY_N_MILLISECONDS(1) { //MIN_MARQUEE_FRAME_MS) {
+    static byte j = HUE_BLUE;
+    j += 4;
+    byte k = j;
+
+    // The following code is roughly equivalent to fill_rainbow(leds, NUM_LEDS, j, 8)
+    CRGB c;
+    for (int i = 0; i < NUM_LEDS; i++)
+      leds[i] = c.setHue(k+=8);
+
+
+    static float scroll = 0.0f;
+    scroll += 0.3f;
+    if (scroll > 5.0f)
+        scroll -= 5.0f;
+
+    for (float i = scroll; i < NUM_LEDS/2 - 1; i += 5) {
+        DrawPixels(i, 3, CRGB::Black);
+        DrawPixels(NUM_LEDS-1-(int)i, 3, CRGB::Black);
+    }
+  }
+}
