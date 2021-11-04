@@ -62,7 +62,6 @@ ezButton button_ptrn_chg(PTRN_CHG_PIN);
 #include <simple.h>
 #include <marquee.h>
 #include <comet.h>
-#include <ledgfx.h>
 
 
 // FramesPerSecond (borrowed from https://github.com/davepl/DavesGarageLEDSeries)
