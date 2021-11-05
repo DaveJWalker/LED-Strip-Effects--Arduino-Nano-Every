@@ -39,7 +39,7 @@
 
 // Button-related defines
 #define PTRN_CHG_PIN          4   // Pin for the pattern change button
-#define MaxPatterns           8   // Total number of patterns
+#define MaxPatterns           7   // Total number of patterns
 #define PatternSwitchTime     30  // Time for automatically switching Patterns in seconds
 
 // Other defines
@@ -177,9 +177,9 @@ void loop() {
   case 5:
     DrawComet ();
     break;
-  case 6:
-    fire.DrawFire ();
-    break;
+//  case 6:
+//    fire.DrawFire ();
+//    break;
   default:
     FastLED.clear();
     break;
