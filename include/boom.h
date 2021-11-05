@@ -37,7 +37,7 @@ void flare() {
   // initialize launch sparks
   for (int i = 0; i < 5; i++) { 
     sparkPos[i] = 0;
-    sparkVel[i] = (float(random(50,255)) / 255.0) * (flareVel / 3.0);  // random around 20% of flare velocity
+    sparkVel[i] = (float(random(50,255)) / 255.0) * (flareVel / 5.0);  // random around 20% of flare velocity
     sparkCol[i] = sparkVel[i] * 1000;
     sparkCol[i] = constrain(sparkCol[i], 0, 255);
   } 
@@ -52,24 +52,24 @@ void flare() {
       sparkVel[i] += gravity;
       sparkCol[i] += -.8;
       sparkCol[i] = constrain(sparkCol[i], 200, 255);
-      leds[int(sparkPos[i])] = HeatColor(sparkCol[i]);
-      leds[int(sparkPos[i])] %= 50; // reduce brightness to 50/255
+//    leds[int(sparkPos[i])] = HeatColor(sparkCol[i]);
+      DrawPixels(sparkPos[i], 1.0f, HeatColor(sparkCol[i]));
+      leds[int(sparkPos[i])] %= 50; // reduce brightness to 50/255 (TBD how to handle with DrawPixels)
     }
     
     // flare
-//    leds[int(flarePos)] = CHSV(0, 0, int(brightness * 255));
+//  leds[int(flarePos)] = CHSV(0, 0, int(brightness * 255));
     DrawPixels(flarePos, 1.5f, CHSV(0,0,int(brightness*255)));
     FastLED.show();
 //  FastLED.clear();
-    // Fade the LEDs
+    // Fade the LEDs (TODO - write a function for this operation...)
     for (int j=0; j < NUM_LEDS; j++)
       if (random8(2) == 0)
         leds[j] = leds[j].fadeToBlackBy(32);
 
     flarePos += flareVel;
     flareVel += gravity;
-//  brightness *= .985;
-    brightness *= .995;
+    brightness *= .995;   // Previous value 0.985 dimmed flare too much
   }
 }
 
