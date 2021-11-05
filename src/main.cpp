@@ -39,7 +39,7 @@
 
 // Button-related defines
 #define PTRN_CHG_PIN          4   // Pin for the pattern change button
-#define MaxPatterns           7   // Total number of patterns
+#define MaxPatterns           8   // Total number of patterns
 #define PatternSwitchTime     30  // Time for automatically switching Patterns in seconds
 
 // Other defines
@@ -90,6 +90,9 @@ double FramesPerSecond(double seconds) {
 void setup() {
   Serial.begin(115200);
 
+  // Add entropy to random number generator; we use a lot of it for fire.
+  random16_add_entropy( random());
+
   // Set pattern change button debounce time to 50ms
   button_ptrn_chg.setDebounceTime(50);
 
@@ -113,8 +116,6 @@ void loop() {
 
   // Set the FrameStart time to the end of the last frame.
   FrameStart = FrameEnd;
-
-  FireEffect fire(NUM_LEDS, 20, 100, 3, 4, true, true);
 
   // Read the brightness pot and set LED brightness
   potVal = 1023 - analogRead(BRIGHT_PIN);
@@ -177,9 +178,9 @@ void loop() {
   case 5:
     DrawComet ();
     break;
-//  case 6:
-//    fire.DrawFire ();
-//    break;
+  case 6:
+    Fire2012WithPalette ();
+    break;
   default:
     FastLED.clear();
     break;
