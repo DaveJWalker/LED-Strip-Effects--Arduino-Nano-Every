@@ -108,11 +108,10 @@ void loop()
 // SPARKING: What chance (out of 255) is there that a new spark will be lit?
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
 // Default 120, suggested range 50-200.
-#define SPARKING 50
+#define SPARKING 25
 
 
-void Fire2012WithPalette()
-{
+void Fire2012WithPalette() {
 // Array of temperature readings at each simulation cell
   static uint8_t heat[NUM_LEDS];
 
