@@ -23,7 +23,7 @@ extern uint8_t gHue;
 // Other defines
 #define MIRRORED_STRIP        1   // Set to 0 or 1... '1' to make the LED strip 'mirrored'
 #define NUM_BALLS             5   // Number of balls for 'juggle'
-#define BALL_PHASE            2   // 'Phase' multiplier for juggling balls... the relative speeds
+#define BALL_PHASE            1   // 'Phase' multiplier for juggling balls... the relative speeds
                                   // of the balls increases with this value.
 
 
@@ -110,7 +110,10 @@ void juggle() {
     if (random8(3) == 0)
       leds[j] = leds[j].fadeToBlackBy(96);
 
-  byte dothue = 0;
+  // The hue of each ball slowly changes
+  static byte init_dothue = 0;
+  EVERY_N_MILLISECONDS(10) {init_dothue++;}
+  byte dothue = init_dothue;
 
   // Calculate ball positions
   for ( int i = 0; i < NUM_BALLS; i++) {
@@ -129,7 +132,7 @@ void juggle() {
       }
       leds[last_pos[i]] |= CHSV(dothue, 200, 255);
     }
-    dothue += 32;
+    dothue += 255 / NUM_BALLS;
   }
 }
 
