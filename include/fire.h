@@ -108,7 +108,7 @@ void loop()
 // SPARKING: What chance (out of 255) is there that a new spark will be lit?
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
 // Default 120, suggested range 50-200.
-#define SPARKING 25
+#define SPARKING 30
 
 
 void Fire2012WithPalette() {
@@ -126,7 +126,10 @@ void Fire2012WithPalette() {
     }
     
     // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-    if( random8() < SPARKING ) {
+    // For sparking, I use the Arduino random() function instead of
+    // random8.  It's a tad slower (the diff is 1-2FPS), but it gives
+    // better random looking fire IMO.
+    if( random(0,255) < SPARKING ) {
       int y = random8(7);
       heat[y] = qadd8( heat[y], random8(160,255) );
     }

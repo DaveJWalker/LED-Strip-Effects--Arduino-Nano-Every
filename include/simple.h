@@ -22,6 +22,7 @@ extern uint8_t gHue;
 
 // Other defines
 #define MIRRORED_STRIP        1   // Set to 0 or 1... '1' to make the LED strip 'mirrored'
+#define NUM_BALLS             3   // Number of balls for 'juggle'
 
 
 // -._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-
@@ -100,7 +101,7 @@ void juggle() {
   static int last_pos = 0;
   fadeToBlackBy( leds, NUM_LEDS, 20);
   byte dothue = 0;
-  for ( int i = 0; i < 8; i++) {
+  for ( int i = 0; i < NUM_BALLS; i++) {
     leds[beatsin16(i*2 + 7, 0, NUM_LEDS)] |= CHSV(dothue, 200, 255);
     dothue += 32;
   }

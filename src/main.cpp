@@ -40,7 +40,7 @@
 // Button-related defines
 #define PTRN_CHG_PIN          4   // Pin for the pattern change button
 #define NumPatterns           9   // Total number of patterns
-#define PatternSwitchTime     60  // Time for automatically switching Patterns in seconds
+#define PatternSwitchTime     30  // Time for automatically switching Patterns in seconds
 
 // Other defines
 #define MIRRORED_STRIP        1   // Set to 0 or 1... '1' to make the LED strip 'mirrored'
@@ -54,7 +54,7 @@ uint8_t gHue              = 0;    // Rotating "base color" used by many of the p
 uint8_t Brightness        = 0;    // LED brightness
 int     potVal;                   // Potentiometer (used for LED brightness control)
 boolean autoSwitchPattern = true; // Boolean to control pattern autoswitching
-uint8_t currentPattern    = 7;
+uint8_t currentPattern    = 0;
 
 // Keep track of frames-per-second
 double FrameStart         = 0;    // Frame start time
