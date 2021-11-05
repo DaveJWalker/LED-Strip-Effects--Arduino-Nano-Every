@@ -21,18 +21,25 @@
 
 
 // LED defines for number of LEDs, LED chipset, etc.
-#define NUM_LEDS 300
-#define LED_PIN 2
-#define BRIGHT_PIN 21
-#define COLOR_ORDER GRB
-#define LED_CHIPSET WS2812B
-#define INIT_BRIGHTNESS 50
-#define VOLTS 5
-#define MAX_MILLIAMPS 5000
+#define NUM_LEDS              300
+#define LED_PIN               2
+#define BRIGHT_PIN            21
+#define COLOR_ORDER           GRB
+#define LED_CHIPSET           WS2812B
+#define INIT_BRIGHTNESS       50
+#define VOLTS                 5
+#define MAX_MILLIAMPS         5000
+
+// FIXME: The following defines are temporary because I'm using ledgfx.h
+// utility written by Dave Plumber.  That utility requires these defines...
+// I'll look into removing it later... maybe.
+#define FAN_SIZE              16  // Number of LEDs in each fan
+#define NUM_FANS              3   // Number of Fans
+#define LED_FAN_OFFSET        4   // How far from bottom first pixel is
 
 // Button-related defines
-#define PTRN_CHG_PIN 4
-#define MaxPatterns 7
+#define PTRN_CHG_PIN          4   // Pin for the pattern change button
+#define MaxPatterns           8   // Total number of patterns
 #define PatternSwitchTime     30  // Time for automatically switching Patterns in seconds
 
 // Other defines
@@ -41,27 +48,29 @@
 CRGBArray<NUM_LEDS> leds;
 
 
-uint8_t value = 100;
-uint8_t white_pos = 0;
-uint8_t gHue = 0;                 // rotating "base color" used by many of the patterns
-uint8_t Brightness = 0;           // LED brightness
+uint8_t value             = 100;
+uint8_t white_pos         = 0;
+uint8_t gHue              = 0;    // Rotating "base color" used by many of the patterns
+uint8_t Brightness        = 0;    // LED brightness
 int     potVal;                   // Potentiometer (used for LED brightness control)
 boolean autoSwitchPattern = true; // Boolean to control pattern autoswitching
-uint8_t currentPattern = 0;
+uint8_t currentPattern    = 0;
 
 // Keep track of frames-per-second
-double FrameStart = 0;
-double FrameEnd   = 0;
-double fps        = 0;
-
-// Create ezButton object for pattern change button
-ezButton button_ptrn_chg(PTRN_CHG_PIN);
+double FrameStart         = 0;    // Frame start time
+double FrameEnd           = 0;    // Frame end time
+double fps                = 0;    // Average frames-per-second
 
 // Include LED patterns
 #include <twinkles.h>
 #include <simple.h>
 #include <marquee.h>
 #include <comet.h>
+#include <fire.h>
+
+
+// Create ezButton object for pattern change button
+ezButton button_ptrn_chg(PTRN_CHG_PIN);
 
 
 // FramesPerSecond (borrowed from https://github.com/davepl/DavesGarageLEDSeries)
@@ -104,6 +113,8 @@ void loop() {
 
   // Set the FrameStart time to the end of the last frame.
   FrameStart = FrameEnd;
+
+  FireEffect fire(NUM_LEDS, 20, 100, 3, 4, true, true);
 
   // Read the brightness pot and set LED brightness
   potVal = 1023 - analogRead(BRIGHT_PIN);
@@ -165,6 +176,9 @@ void loop() {
     break;
   case 5:
     DrawComet ();
+    break;
+  case 6:
+    fire.DrawFire ();
     break;
   default:
     FastLED.clear();

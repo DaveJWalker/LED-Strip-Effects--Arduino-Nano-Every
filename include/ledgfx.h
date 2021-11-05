@@ -8,7 +8,7 @@
 //
 //   LED Drawing Routines for Dave's Garage Tutorial series
 //
-// History:     OCt-18-2020     davepl      Created from main.cpp code
+// History:     Oct-18-2020     davepl      Created from main.cpp code
 //---------------------------------------------------------------------------
 
 #pragma once
@@ -17,7 +17,7 @@
 #define FASTLED_INTERNAL
 #include <FastLED.h>
 
-#include <sys/time.h>                   // For time-of-day
+//#include <sys/time.h>                   // For time-of-day
 
 // Utility Macros
 
@@ -111,12 +111,14 @@ inline float RandomFloat()
     return r;
 }
 
+/*
 inline double UnixTime()
 {
     timeval tv = { 0 };
     gettimeofday(&tv, nullptr);
     return (double)(tv.tv_usec / 1000000.0 + (double) tv.tv_sec);
 }
+*/
 
 
 // FractionalColor
