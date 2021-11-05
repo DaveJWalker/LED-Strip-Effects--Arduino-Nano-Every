@@ -39,8 +39,8 @@
 
 // Button-related defines
 #define PTRN_CHG_PIN          4   // Pin for the pattern change button
-#define MaxPatterns           8   // Total number of patterns
-#define PatternSwitchTime     30  // Time for automatically switching Patterns in seconds
+#define NumPatterns           9   // Total number of patterns
+#define PatternSwitchTime     60  // Time for automatically switching Patterns in seconds
 
 // Other defines
 #define MIRRORED_STRIP        1   // Set to 0 or 1... '1' to make the LED strip 'mirrored'
@@ -54,7 +54,7 @@ uint8_t gHue              = 0;    // Rotating "base color" used by many of the p
 uint8_t Brightness        = 0;    // LED brightness
 int     potVal;                   // Potentiometer (used for LED brightness control)
 boolean autoSwitchPattern = true; // Boolean to control pattern autoswitching
-uint8_t currentPattern    = 0;
+uint8_t currentPattern    = 7;
 
 // Keep track of frames-per-second
 double FrameStart         = 0;    // Frame start time
@@ -67,6 +67,7 @@ double fps                = 0;    // Average frames-per-second
 #include <marquee.h>
 #include <comet.h>
 #include <fire.h>
+#include <boom.h>
 
 
 // Create ezButton object for pattern change button
@@ -132,7 +133,7 @@ void loop() {
       currentPattern = 0;
       autoSwitchPattern = false;
     }
-    else if (currentPattern < MaxPatterns-1) {
+    else if (currentPattern < NumPatterns-1) {
       currentPattern++;
     }
     else {
@@ -149,7 +150,7 @@ void loop() {
   // (The last pattern is always blank so skip that one.)
   if (autoSwitchPattern) {
     EVERY_N_SECONDS(PatternSwitchTime) {
-      if (currentPattern < MaxPatterns-2)
+      if (currentPattern < NumPatterns-2)
         currentPattern++;
       else
         currentPattern = 0;
@@ -180,6 +181,10 @@ void loop() {
     break;
   case 6:
     Fire2012WithPalette ();
+    break;
+  case 7:
+    flare();
+    explodeLoop();
     break;
   default:
     FastLED.clear();
