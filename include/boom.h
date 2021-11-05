@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <FastLED.h>
+#include <ledgfx.h>
 
 extern CRGBArray<NUM_LEDS> leds;
 
@@ -10,7 +11,10 @@ extern CRGBArray<NUM_LEDS> leds;
 // Borrowed from http://www.anirama.com/1000leds/1d-fireworks/ and then hacked
 // to pieces.  The original code had tons of problems and barely worked.  Even after
 // tons of tweaking, it still barely works.  The performance of the Arduino Nano
-// Every microcontroller isn't nearly enough to get fluid animation.
+// Every microcontroller isn't nearly enough to get fluid animation.  Another huge
+// problem with this animation is that it doesn't behave well in a loop.  You can't
+// monitor button presses or potentiometer values (read brightness control) while
+// it's running.
 
 
 #define NUM_SPARKS NUM_LEDS / 2  // max number of sparks
@@ -39,7 +43,7 @@ void flare() {
   } 
   // launch 
 
-  while (flareVel >= -.2) {
+  while (flareVel >= -.05) {
     delay(0);
     // sparks
     for (int i = 0; i < 5; i++) {
@@ -53,7 +57,8 @@ void flare() {
     }
     
     // flare
-    leds[int(flarePos)] = CHSV(0, 0, int(brightness * 255));
+//    leds[int(flarePos)] = CHSV(0, 0, int(brightness * 255));
+    DrawPixels(flarePos, 1.5f, CHSV(0,0,int(brightness*255)));
     FastLED.show();
 //  FastLED.clear();
     // Fade the LEDs
@@ -63,7 +68,8 @@ void flare() {
 
     flarePos += flareVel;
     flareVel += gravity;
-    brightness *= .985;
+//  brightness *= .985;
+    brightness *= .995;
   }
 }
 
@@ -83,7 +89,7 @@ void explodeLoop() {
     sparkCol[i] = abs(sparkVel[i]) * 5000; // set colors before scaling velocity to keep them bright 
     sparkCol[i] = constrain(sparkCol[i], 150, 255); 
 //  sparkCol[i] = random(200,255);
-    sparkVel[i] *= flarePos * 2 / (NUM_LEDS-1); // proportional to height
+    sparkVel[i] *= flarePos * 4 / (NUM_LEDS-1); // proportional to height
 //  Serial.print(sparkVel[i],1);
 //  Serial.print(" ");
   }
@@ -102,16 +108,20 @@ void explodeLoop() {
       sparkPos[i] += sparkVel[i]; 
       sparkPos[i] = constrain(sparkPos[i], 0, NUM_LEDS-1); 
       sparkVel[i] += dying_gravity; 
-      sparkCol[i] *= .99; 
+//    sparkCol[i] *= .99; 
+      sparkCol[i] *= .98; 
       sparkCol[i] = constrain(sparkCol[i], 0, 255); // red cross dissolve 
       if(sparkCol[i] > c1) { // fade white to yellow
-        leds[int(sparkPos[i])] = CRGB(255, 255, (255 * (sparkCol[i] - c1)) / (255 - c1));
+        DrawPixels(sparkPos[i], 1.0f, CRGB(255, 255, (255 * (sparkCol[i] - c1)) / (255 - c1)));
+//      leds[int(sparkPos[i])] = CRGB(255, 255, (255 * (sparkCol[i] - c1)) / (255 - c1));
       }
       else if (sparkCol[i] < c2) { // fade from red to black
-        leds[int(sparkPos[i])] = CRGB((255 * sparkCol[i]) / c2, 0, 0);
+        DrawPixels(sparkPos[i], 1.0f, CRGB((255 * sparkCol[i]) / c2, 0, 0));
+//      leds[int(sparkPos[i])] = CRGB((255 * sparkCol[i]) / c2, 0, 0);
       }
       else { // fade from yellow to red
-        leds[int(sparkPos[i])] = CRGB(255, (255 * (sparkCol[i] - c2)) / (c1 - c2), 0);
+        DrawPixels(sparkPos[i], 1.0f, CRGB(255, (255 * (sparkCol[i] - c2)) / (c1 - c2), 0));
+//      leds[int(sparkPos[i])] = CRGB(255, (255 * (sparkCol[i] - c2)) / (c1 - c2), 0);
       }
     }
     dying_gravity *= .995; // as sparks burn out they fall slower
@@ -119,7 +129,7 @@ void explodeLoop() {
   }
     // Fade the LEDs
     for (int j=0; j < NUM_LEDS; j++)
-      if (random8(2) == 0)
+      if (random8(1) == 0)
         leds[j] = leds[j].fadeToBlackBy(128);
 //FastLED.clear();
   FastLED.show();

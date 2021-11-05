@@ -191,7 +191,7 @@ void loop() {
 //unsigned long elapsedTime_us  = micros();
 //float         fmillis         = elapsedTime_us/1000.0;
   EVERY_N_SECONDS(10) {
-    debug   ("Elapsed Time (s): ");
+    debug   ("Running Time (s): ");
 //  debug   (elapsedTime_ms);
 //  debug   (", ");
     debugln1(fsecondsRunning,3);
