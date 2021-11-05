@@ -22,7 +22,9 @@ extern uint8_t gHue;
 
 // Other defines
 #define MIRRORED_STRIP        1   // Set to 0 or 1... '1' to make the LED strip 'mirrored'
-#define NUM_BALLS             3   // Number of balls for 'juggle'
+#define NUM_BALLS             5   // Number of balls for 'juggle'
+#define BALL_PHASE            2   // 'Phase' multiplier for juggling balls... the relative speeds
+                                  // of the balls increases with this value.
 
 
 // -._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-
@@ -95,14 +97,38 @@ void sinelon_no_gap()
 
 // -._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-'~`-._,-
 //
-// Eight colored dots, weaving in and out of sync with each other
+// Multiple colored dots, weaving in and out of sync with each other
+// I improved it so that there are no gaps between subsequent frames
+// for quick moving balls... and I also added twinkly tails.
 //
 void juggle() {
-  static int last_pos = 0;
-  fadeToBlackBy( leds, NUM_LEDS, 20);
+  static int curr_pos [NUM_BALLS] = { 0 };  // Current ball positions
+  static int last_pos [NUM_BALLS] = { 0 };  // Previous ball positions
+
+  // Fade the LED strip (randomly to make twinkles)
+  for (int j=0; j < NUM_LEDS; j++)
+    if (random8(3) == 0)
+      leds[j] = leds[j].fadeToBlackBy(96);
+
   byte dothue = 0;
+
+  // Calculate ball positions
   for ( int i = 0; i < NUM_BALLS; i++) {
-    leds[beatsin16(i*2 + 7, 0, NUM_LEDS)] |= CHSV(dothue, 200, 255);
+    curr_pos[i] = beatsin16(i * BALL_PHASE + 7, 0, NUM_LEDS-1);
+    if (abs(curr_pos[i] - last_pos[i]) > 20 ) {
+      // this is a really big gap:  some other effect has been running
+      // rather than fill many LEDs suddenly with one colour
+      // let's just pretend this frame never happened
+      last_pos[i] = curr_pos[i];
+    }
+    while (last_pos[i] != curr_pos[i]) {
+      if (last_pos[i] < curr_pos[i]) {
+        last_pos[i]++;
+      } else {
+        last_pos[i]--;
+      }
+      leds[last_pos[i]] |= CHSV(dothue, 200, 255);
+    }
     dothue += 32;
   }
 }
