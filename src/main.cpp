@@ -161,15 +161,15 @@ void loop() {
 
   // Display an LED pattern based on currentPattern value
   switch (currentPattern) {
-    case 0:    rainbowSparkles();       break;
-    case 1:    twinkleMaster();         break;
-    case 2:    juggle();                break;
-    case 3:    sinelon_no_gap();        break;
-    case 4:    DrawMarquee();           break;
-    case 5:    DrawComet();             break;
-    case 6:    Fire2012WithPalette();   break;
-    case 7:    flare(); explodeLoop();  break;
-    default:   FastLED.clear();         break;
+    case 0:   rainbowSparkles();      break;
+    case 1:   twinkleMaster();        break;
+    case 2:   juggle();               break;
+    case 3:   sinelon_no_gap();       break;
+    case 4:   DrawMarquee();          break;
+    case 5:   DrawComet();            break;
+    case 6:   Fire2012WithPalette();  break;
+    case 7:   flare(); explodeLoop(); break;
+    default:  FastLED.clear();        break;
   }
 
   // And update the LEDs
@@ -190,7 +190,7 @@ void loop() {
   float         fsecondsRunning = elapsedTime_ms/1000.0;
 //unsigned long elapsedTime_us  = micros();
 //float         fmillis         = elapsedTime_us/1000.0;
-  EVERY_N_SECONDS(5) {
+  EVERY_N_SECONDS(10) {
     debug   ("Elapsed Time (s): ");
 //  debug   (elapsedTime_ms);
 //  debug   (", ");
