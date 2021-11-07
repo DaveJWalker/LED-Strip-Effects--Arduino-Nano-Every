@@ -1,4 +1,10 @@
 // Borrowed from https://github.com/davepl/DavesGarageLEDSeries)
+// For some reason, the performance of this code on the Arduino Nano
+// Every is abysmal.  I have no idea why.  In any case, this code is nearly
+// identical to the 'Fire2012' code in fire.h.  I believe Dave Plummer
+// just 'borrowed' this code, turned it into an object, and tweaked it a bit.
+// Frankly, I think it's a bit overcomplicated now.  Keeping this version
+// here, but I think I'll just go with the simpler procedural code instead.  
 //+--------------------------------------------------------------------------
 //
 // NightDriver - (c) 2020 Dave Plummer.  All Rights Reserved.
@@ -92,9 +98,9 @@ class FireEffect
         {
             CRGB color = HeatColor(heat[i]);
             int j = bReversed ? (Size - 1 - i) : i;
-            DrawFanPixels(j, 1, color, order);
+            DrawPixels(j, 1, color);
             if (bMirrored)
-                DrawFanPixels(!bReversed ? (2 * Size - 1 - i) : Size + i, 1, color, order);
+                DrawPixels(!bReversed ? (2 * Size - 1 - i) : Size + i, 1, color);
         }
     }
 };
