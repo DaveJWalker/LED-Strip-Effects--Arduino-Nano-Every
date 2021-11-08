@@ -1,6 +1,8 @@
 #include <FastLED.h>
 #include <ledgfx.h>
 
+// TODO: Add ability to pass palettes to this route.
+
 // Fire2012 with programmable Color Palette
 //
 // This code is the same fire simulation as the original "Fire2012",
@@ -103,8 +105,11 @@ void Fire2012WithPalette(int  size        = NUM_LEDS, // Total number of pixels 
   }
   
   // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-  for( int i= size - 1; i >= 2; i--) {
-//    heat[i] = (heat[i - 1] + heat[i - 2] + heat[i - 2] ) / 3;
+  // (The blending used below comes from DavePl and seems like overkill.
+  // I can't really tell much of a difference between that and the simpler
+  // blending on the line above it.)
+  for( int i = size - 1; i >= 3; i--) {
+//  heat[i] = (heat[i - 1] + heat[i - 2] + heat[i - 2] ) / 3;
     heat[i] = (heat[i] * BlendSelf +
                heat[(i - 1) % size] * BlendNeighbor1 +
                heat[(i - 2) % size] * BlendNeighbor2 +
@@ -125,7 +130,6 @@ void Fire2012WithPalette(int  size        = NUM_LEDS, // Total number of pixels 
 
   // Step 4.  Map from heat cells to LED colors
   for( int i = 0; i < size; i++) {
-
     // Scale the heat value from 0-255 down to 0-240
     // for best results with color palettes.
     uint8_t colorindex = scale8( heat[i], 240);
