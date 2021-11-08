@@ -1,9 +1,5 @@
 #include <FastLED.h>
-
-#define FRAMES_PER_SECOND 60
-
-bool gReverseDirection = false;
-
+#include <ledgfx.h>
 
 // Fire2012 with programmable Color Palette
 //
@@ -46,15 +42,9 @@ CRGBPalette16 gPal = HeatColors_p;
   // Third, here's a simpler, three-step gradient, from black to red to white
   //   gPal = CRGBPalette16( CRGB::Black, CRGB::Red, CRGB::White);
 
-
-/*
-void loop()
-{
-  // Add entropy to random number generator; we use a lot of it.
-  random16_add_entropy( random());
-
   // Fourth, the most sophisticated: this one sets up a new palette every
-  // time through the loop, based on a hue that changes every time.
+  // time through the loop, based on a hue that changes every time. To use
+  // this hue, it needs to be added to the loop.
   // The palette is a gradient from black, to a dark color based on the hue,
   // to a light color based on the hue, to white.
   //
@@ -63,14 +53,6 @@ void loop()
   //   CRGB darkcolor  = CHSV(hue,255,192); // pure hue, three-quarters brightness
   //   CRGB lightcolor = CHSV(hue,128,255); // half 'whitened', full brightness
   //   gPal = CRGBPalette16( CRGB::Black, darkcolor, lightcolor, CRGB::White);
-
-
-  Fire2012WithPalette(); // run simulation frame, using palette colors
-  
-  FastLED.show(); // display this frame
-  FastLED.delay(1000 / FRAMES_PER_SECOND);
-}
-*/
 
 // Fire2012 by Mark Kriegsman, July 2012
 // as part of "Five Elements" shown here: http://youtu.be/knWiGsmgycY
@@ -82,70 +64,77 @@ void loop()
 //  1) All cells cool down a little bit, losing heat to the air
 //  2) The heat from each cell drifts 'up' and diffuses a little
 //  3) Sometimes randomly new 'sparks' of heat are added at the bottom
-//  4) The heat from each cell is rendered as a color into the leds array
-//     The heat-to-color mapping uses a black-body radiation approximation.
+//  4) The heat from each cell is rendered as a color into the leds array.
 //
 // Temperature is in arbitrary units from 0 (cold black) to 255 (white hot).
 //
-// This simulation scales it self a bit depending on NUM_LEDS; it should look
-// "OK" on anywhere from 20 to 100 LEDs without too much tweaking. 
+// DJW: This routine has been tweaked a little based partially on Dave
+// Plummer's modifications mostly for mirroring and reversing (located
+// here https://github.com/davepl/DavesGarageLEDSeries) and also based on
+// my own tweaks.
 //
-// I recommend running this simulation at anywhere from 30-100 frames per second,
-// meaning an interframe delay of about 10-35 milliseconds.
-//
-// Looks best on a high-density LED setup (60+ pixels/meter).
-//
-//
-// There are two main parameters you can play with to control the look and
-// feel of your fire: COOLING (used in step 1 above), and SPARKING (used
-// in step 3 above).
-//
-// COOLING: How much does the air cool as it rises?
-// Less cooling = taller flames.  More cooling = shorter flames.
-// Default 55, suggested range 20-100 
-#define COOLING  100
-
-// SPARKING: What chance (out of 255) is there that a new spark will be lit?
-// Higher chance = more roaring fire.  Lower chance = more flickery fire.
-// Default 120, suggested range 50-200.
-#define SPARKING 30
+// When diffusing the fire upwards, these control how much to blend in from
+// the cells below (ie: downward neighbors). You can tune these coefficients
+// to control how quickly and smoothly the fire spreads.
+static const byte BlendSelf      = 2;
+static const byte BlendNeighbor1 = 3;
+static const byte BlendNeighbor2 = 2;
+static const byte BlendNeighbor3 = 1;
+static const byte BlendTotal     = (BlendSelf + BlendNeighbor1 + BlendNeighbor2 + BlendNeighbor3);
 
 
-void Fire2012WithPalette() {
+void Fire2012WithPalette(int  size        = NUM_LEDS, // Total number of pixels for the flame effect (max NUM_LEDS)
+                         int  cooling     = 90,       // Cooling rate (less cooling = taller flames) (suggested range 20-100)
+                         int  sparks      = 2,        // Number of spark attempts per frame
+                         int  sparkHeight = 8,        // Max height for each spark
+                         int  sparking    = 20,       // Probability of a spark for each attempt (out of 255)
+                         bool bReversed   = false,     // Flames can be reversed
+                         bool bMirrored   = false     // If mirrored, the LED array is split and mirrored
+) {
 // Array of temperature readings at each simulation cell
   static uint8_t heat[NUM_LEDS];
 
+  // Cut the size in half when mirroring
+  if (bMirrored) size /= 2;
+
   // Step 1.  Cool down every cell a little
-    for( int i = 0; i < NUM_LEDS; i++) {
-      heat[i] = qsub8( heat[i],  random8(0, ((COOLING * 10) / NUM_LEDS) + 2));
-    }
+  for( int i = 0; i < size; i++) {
+    heat[i] = qsub8( heat[i],  random8(0, ((cooling * 10) / size) + 2));
+  }
   
-    // Step 2.  Heat from each cell drifts 'up' and diffuses a little
-    for( int k= NUM_LEDS - 1; k >= 2; k--) {
-      heat[k] = (heat[k - 1] + heat[k - 2] + heat[k - 2] ) / 3;
-    }
+  // Step 2.  Heat from each cell drifts 'up' and diffuses a little
+  for( int i= size - 1; i >= 2; i--) {
+//    heat[i] = (heat[i - 1] + heat[i - 2] + heat[i - 2] ) / 3;
+    heat[i] = (heat[i] * BlendSelf +
+               heat[(i - 1) % size] * BlendNeighbor1 +
+               heat[(i - 2) % size] * BlendNeighbor2 +
+               heat[(i - 3) % size] * BlendNeighbor3)
+               / BlendTotal;
+  }
     
-    // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
-    // For sparking, I use the Arduino random() function instead of
-    // random8.  It's a tad slower (the diff is 1-2FPS), but it gives
-    // better random looking fire IMO.
-    if( random(0,255) < SPARKING ) {
-      int y = random8(7);
+  // Step 3.  Randomly ignite new 'sparks' of heat near the bottom
+  // For sparking, I use the Arduino random() function instead of
+  // random8.  It's a tad slower (the diff is 1-2FPS), but it gives
+  // better random looking fire IMO.
+  for (int i = 0; i < sparks; i++) {
+    if( random(0,255) < sparking ) {
+      int y = random8(sparkHeight);
       heat[y] = qadd8( heat[y], random8(160,255) );
     }
+  }
 
-    // Step 4.  Map from heat cells to LED colors
-    for( int j = 0; j < NUM_LEDS; j++) {
-      // Scale the heat value from 0-255 down to 0-240
-      // for best results with color palettes.
-      uint8_t colorindex = scale8( heat[j], 240);
-      CRGB color = ColorFromPalette( gPal, colorindex);
-      int pixelnumber;
-      if( gReverseDirection ) {
-        pixelnumber = (NUM_LEDS-1) - j;
-      } else {
-        pixelnumber = j;
-      }
-      leds[pixelnumber] = color;
-    }
+  // Step 4.  Map from heat cells to LED colors
+  for( int i = 0; i < size; i++) {
+
+    // Scale the heat value from 0-255 down to 0-240
+    // for best results with color palettes.
+    uint8_t colorindex = scale8( heat[i], 240);
+    CRGB color = ColorFromPalette( gPal, colorindex);
+
+    // Now draw the colors to the LED strip
+    int j = bReversed ? (size - 1 - i) : i;
+    leds[j] = color;
+    if (bMirrored)
+      leds[!bReversed ? (2*size - 1 - i) : size + i] = color;
+  }
 }
