@@ -11,7 +11,10 @@ extern CRGBArray<NUM_LEDS> leds;
 // then hacked to pieces.  The thing that I prefer on this implementation
 // vs. boom.h is that this implementation is a finite-state-machine.  As
 // such, it is MUCH more loop friendly.  In other words, you can continue
-// checking button status, etc.
+// checking button status, control LED brightness, etc.
+// UPDATE: After trying this implementation out, I really don't like it.
+// It looks nothing like fireworks.
+
 
 /* Fireworks for FastLED 2.1 or greater
 
@@ -34,7 +37,7 @@ int thisbright = 255;                                         // Standard fully 
 // GRAVBALL VARIABLES
 int gravity = -8;                                             // Gravity                                                 ********* CHANGE ME **************
 int drag = 0;                                                 // Not required due to losses in 16 bit math. Not used.
-int timeinc = 2;                                              // A time increment.
+int timeInc = 2;                                              // A time increment.
 int maxcount = 100;                                           // Maximum number of explosion frames.
 int mycount = 0;                                              // Repeat the explosion counter.
 
@@ -44,7 +47,7 @@ int streamervelocity = 500;                                   // Velocity of the
 int explosionvelocity = 500;                                  // Maximum velocity of the explosion.                       ********* CHANGE ME **************
 
 
-uint8_t thisstatus = 0;                                       // Used to determine which state our finite state machine is in.
+uint8_t boomState = 0;                                       // Used to determine which state our finite state machine is in.
 
 #define numgravs 6                                            // How many gravs we are using. The first one is our streamer.  ********* CHANGE ME **************
 
@@ -61,44 +64,31 @@ typedef struct {                                              // Define a struct
 gravs mygravs[numgravs];
 
 
-void loop () {
-  fire();                                                     // It's really a finite state machine, so no huge 'for' loops.
-  show_at_max_brightness_for_power();                         // Display the LED's
-  delay_at_max_brightness_for_power(thisdelay*2.5);           // And delay
-  Serial.println(LEDS.getFPS());
-} // loop()
+//void loop () {
+//  fire();                                                     // It's really a finite state machine, so no huge 'for' loops.
+//  show_at_max_brightness_for_power();                         // Display the LED's
+//  delay_at_max_brightness_for_power(thisdelay*2.5);           // And delay
+//  Serial.println(LEDS.getFPS());
+//} // loop()
 
 
 
-void fire() {                                                 // States of fireworks, need to be loop friendly.
-  switch (thisstatus) {
-    case 0: firestart(); break;                               // Initialize the first element of array to shoot into the 'sky'.
-    case 1: fireup(); break;                                  // Send it up. Once it reaches the top, we change status to '2'
-    case 2: explodeinit(); break;                             // Initialize the array for the remainder of the fireworks elements. and change status.
-    case 3: explode(); break;                                 // Now, let's explode them for a count duration and reset to 0 when done.
-    default: break;
-  }
-} // fire()
-
-
-
-void firestart() {                                            // Initialize variable for a new streamer being shot into the 'sky'.
-  mygravs[0].distold = 0;
+void firestart() {                        // Initialize variable for a new streamer being shot into the 'sky'.
+  mygravs[0].distold  = 0;
   mygravs[0].distance = 0;
-  mygravs[0].velold = streamervelocity;                       // Goes to a maximum distance of ~18000. Needs more LED's
+  mygravs[0].velold   = streamervelocity; // Goes to a maximum distance of ~18000. Needs more LED's
   mygravs[0].velocity = streamervelocity;
-  mygravs[0].thishue = random8();                             // Might as well make it multi-coloured
-  mygravs[0].thissat = 50;                                    // But not very saturated
+  mygravs[0].thishue  = random8();        // Might as well make it multi-coloured
+  mygravs[0].thissat  = 50;               // But not very saturated
   mygravs[0].thisbright = 128;
-  thisstatus = 1;
-} // firestart()
+  boomState = 1;                          // Advance to the next state
+}
 
 
 
 void fireup() {                                               // Shoot fireworks into the air.
-
-  mygravs[0].velocity = mygravs[0].velold + gravity*timeinc;  // Split gravity math into two lines for simplicity.
-  mygravs[0].distance = mygravs[0].distold + mygravs[0].velocity*timeinc;
+  mygravs[0].velocity = mygravs[0].velold + gravity*timeInc;  // Split gravity math into two lines for simplicity.
+  mygravs[0].distance = mygravs[0].distold + mygravs[0].velocity*timeInc;
 
   int i = map(mygravs[0].distance, 0, 32767, 0, NUM_LEDS);
     
@@ -106,7 +96,7 @@ void fireup() {                                               // Shoot fireworks
   mygravs[0].distold = mygravs[0].distance;
 
   if (i < NUM_LEDS) leds[i] = CHSV(mygravs[0].thishue, mygravs[0].thissat, mygravs[0].thisbright);     // Let's get ready to display it, but not if it's too high.
-  if(mygravs[0].velold <= 0) thisstatus = 2;                  // Starting to fall, so let's stop this nonsense.
+  if(mygravs[0].velold <= 0) boomState = 2;                  // Starting to fall, so let's stop this nonsense.
 
   for (int j = 0; j < NUM_LEDS; j++) leds[j].fadeToBlackBy(16);  // The trail fades slowly over time.
 
@@ -129,18 +119,18 @@ void explodeinit () {
     mygravs[k].thisbright = thisbright;                       // and very bright.
   }
   mycount = 0;                                                // This is a counter for the # of times to go through the exploding loop.
-  thisstatus = 3;                                             // Once done initializing, let's move onto the next step of exploding.
-} // explodeinit()
+  boomState = 3;                                             // Once done initializing, let's move onto the next step of exploding.
+}
 
 
 void explode() {
 
-  if (mycount++ >=maxcount) thisstatus = 0;                   // Only do this so many times.
+  if (mycount++ >=maxcount) boomState = 0;                   // Only do this so many times.
 
   for (int k=1; k < numgravs; k++) {
 
-    mygravs[k].velocity = mygravs[k].velold + gravity*timeinc;               // Split gravity math into two lines for simplicity
-    mygravs[k].distance = mygravs[k].distold + mygravs[k].velocity*timeinc;
+    mygravs[k].velocity = mygravs[k].velold + gravity*timeInc;               // Split gravity math into two lines for simplicity
+    mygravs[k].distance = mygravs[k].distold + mygravs[k].velocity*timeInc;
 
     int i = map(mygravs[k].distance, 0, 32767, 0, NUM_LEDS);
     
@@ -152,4 +142,17 @@ void explode() {
     if (i < NUM_LEDS && i >= 0) leds[i] += CHSV(mygravs[k].thishue, thissat, thisbright);    // Let's get ready to display it, but be careful of limits.
   }
   for (int j = 0; j < NUM_LEDS; j++) leds[j].fadeToBlackBy(16);              // Fade everything over time. I could also use nscale8(224) or thereabouts.
-} // explode()
+}
+
+
+void fire() {                                 // States of fireworks, need to be loop friendly.
+  switch (boomState) {
+    case 0: firestart();    break;            // Initialize the first element of array to shoot into the 'sky'.
+    case 1: fireup();       break;            // Send it up. Once it reaches the top, we change status to '2'
+    case 2: explodeinit();  break;            // Initialize the array for the remainder of the fireworks elements. and change status.
+    case 3: explode();      break;            // Now, let's explode them for a count duration and reset to 0 when done.
+    default:                break;
+  }
+}
+
+
