@@ -156,4 +156,3 @@ void firework() {
   // The zero LED is a bit too persistent... just zero it out... looks better.
   leds[0] = 0;
 }
-//typedef enum boomStateType {StFlareInit, StFlareSend, StSplosionInit, StSplosion};
