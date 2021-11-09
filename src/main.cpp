@@ -67,7 +67,7 @@ double fps                = 0;    // Average frames-per-second
 #include <marquee.h>
 #include <comet.h>
 #include <fire.h>
-#include <boom.h>
+#include <fsm_boom.h>
 
 
 // Create ezButton object for pattern change button
@@ -168,7 +168,8 @@ void loop() {
     case 4:   DrawMarquee();          break;
     case 5:   DrawComet();            break;
     case 6:   Fire2012WithPalette(NUM_LEDS, 90, 2, 8, 20, true, true);  break;
-    case 7:   flare(); explodeLoop(); break;
+//  case 7:   flare(); explodeLoop(); break;
+    case 7:   firework();             break;
     default:  FastLED.clear();        break;
   }
 
