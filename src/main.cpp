@@ -67,7 +67,7 @@ double fps                = 0;    // Average frames-per-second
 #include <marquee.h>
 #include <comet.h>
 #include <fire.h>
-#include <fsm_boom.h>
+#include <boom.h>
 
 
 // Create ezButton object for pattern change button
