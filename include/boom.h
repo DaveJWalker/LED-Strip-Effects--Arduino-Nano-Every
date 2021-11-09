@@ -153,6 +153,6 @@ void firework() {
     case StSplosion:     splosion();     break;  // Animate the explosion
     default:                             break;
   }
-  // The zero LED is a bit too persistent... just zero it out... looks better.
-  leds[0] = 0;
+  // The zero LED is a bit too persistent... so just have it mirror the adjacent LED.
+  leds[0] = leds[1];
 }
