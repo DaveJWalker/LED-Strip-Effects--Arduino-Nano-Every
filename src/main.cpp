@@ -167,7 +167,7 @@ void loop() {
     case 3:   sinelon_no_gap();       break;
     case 4:   DrawMarquee();          break;
     case 5:   DrawComet();            break;
-    case 6:   Fire2012WithPalette(NUM_LEDS, 60, 3, 8, 20, true, true);  break;
+    case 6:   Fire2012WithPalette(NUM_LEDS, 60, 3, 6, 20, true, true);  break;
 //  case 7:   flare(); explodeLoop(); break;
     case 7:   firework();             break;
     default:  FastLED.clear();        break;
