@@ -135,5 +135,7 @@ void explodeLoop() {
   FastLED.show();
 }
 
-
-
+void explodeMaster () {
+  flare();
+  explodeLoop();
+}
